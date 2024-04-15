@@ -6,6 +6,7 @@ import { isThenable } from 'not-synchronous/core';
 
 import { Exception } from '@errors';
 import { ensureDirSync } from '@fs';
+import { createLoggerWithDiskFlusher } from '@@internals/log';
 import { assertString, isPlainObject } from '@@internals/utils';
 import type { Dict, LooseAutocomplete, MaybePromise } from '@@types';
 
@@ -206,6 +207,8 @@ export class AbstractVariablesResolverService {
 
 
 const env = new AbstractVariablesResolverService(undefined, process.env as EnvironmentVariables);
+
+export const logger = createLoggerWithDiskFlusher('rayrc.log');
 
 export function readConfigFile(aliases?: Dict<string>): Dict<string | number | boolean | Record<string, string | number | boolean>> {
   const p = path.join(env.getConfigPath(), 'ray.conf');

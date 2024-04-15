@@ -1,7 +1,7 @@
 import { jsonSafeStringify } from '@@internals/safe-json';
 
 
-export class SetList<T> {
+export class SetList<T = any> {
   #items: T[] = [];
 
   public constructor(items?: IterableIterator<T> | Set<T>) {
