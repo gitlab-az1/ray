@@ -17,6 +17,8 @@ module.exports = {
       alias: {
         '@@types': './src/@types',
         '@@internals': './src/@internals',
+        '@@datastructures': './src/@datastructures',
+        
         '@fs': './src/fs',
         '@errors': './src/errors',
         '@env': './src/env',

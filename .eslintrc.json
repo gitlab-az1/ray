@@ -28,7 +28,7 @@
       }
     ],
     "eol-last": "error",
-    "no-magic-numbers":"warn",
+    // "no-magic-numbers":"warn",
     "no-async-promise-executor": "error",
     "@typescript-eslint/no-explicit-any": "off",
     "switch-colon-spacing": [

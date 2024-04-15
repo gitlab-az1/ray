@@ -42,6 +42,9 @@
       "@@internals/*": ["./src/@internals/*"],
       "@@internals": ["./src/@internals"],
 
+      "@@datastructures/*": ["./src/@datastructures/*"],
+      "@@datastructures": ["./src/@datastructures"],
+
       "@fs/*": ["./src/fs/*"],
       "@fs": ["./src/fs"],
 

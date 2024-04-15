@@ -32,6 +32,9 @@
     "typescript": "^5.4.5"
   },
   "dependencies": {
-    "not-synchronous": "^1.1.0"
+    "bufferutil": "^4.0.8",
+    "next-math": "^1.0.1",
+    "not-synchronous": "^1.1.0",
+    "typed-config-parser": "^1.1.0"
   }
 }

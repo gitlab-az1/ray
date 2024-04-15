@@ -1,11 +1,13 @@
 import os from 'node:os';
+import fs from 'node:fs';
 import path from 'node:path';
+import { Parser } from 'typed-config-parser';
 import { isThenable } from 'not-synchronous/core';
 
 import { Exception } from '@errors';
 import { ensureDirSync } from '@fs';
-import type { LooseAutocomplete, MaybePromise } from '@@types';
 import { assertString, isPlainObject } from '@@internals/utils';
+import type { Dict, LooseAutocomplete, MaybePromise } from '@@types';
 
 
 
@@ -106,6 +108,13 @@ export class AbstractVariablesResolverService {
     return p;
   }
 
+  public getDatabasePath(): string {
+    const p = path.join(this.getVariableDataPath(), 'ray', 'data');
+    ensureDirSync(p);
+
+    return p;
+  }
+
   public getEnvironmentVariable<K extends keyof MappedEnvironmentVariables, T = string>(
     name: LooseAutocomplete<K>,
     options: GetVariableOptionsWithFallback<T> // eslint-disable-line comma-dangle
@@ -188,4 +197,17 @@ export class AbstractVariablesResolverService {
 
 
 const env = new AbstractVariablesResolverService(undefined, process.env);
+
+export function readConfigFile(aliases?: Dict<string>): Dict<string | number | boolean | Record<string, string | number | boolean>> {
+  const p = path.join(env.getConfigPath(), 'ray.conf');
+  if(!fs.existsSync(p)) return {};
+
+  const parser = Parser.read(fs.readFileSync(p, 'utf-8'), {
+    commentWith: ['#', ';'],
+  });
+
+  return parser.parse({ keysWithSpaces: 'error', aliases });
+}
+
+
 export default env;

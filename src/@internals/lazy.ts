@@ -18,7 +18,7 @@ export class Lazy<T> {
   private _didRun: boolean = false;
   private _value?: T;
   
-  constructor(private readonly _executor: LazyExecutor<T>) { }
+  public constructor(private readonly _executor: LazyExecutor<T>) { }
 
   /**
    * True if the lazy value has been resolved.

@@ -1,0 +1,15 @@
+/* eslint-disable */
+/* eslint-enable semi, indent */
+"use strict";
+
+const { __$main } = require(process.env.NODE_ENV === 'production' ?
+  '/usr/local/lib/ray/cli' :
+  '../dist/cli');
+
+
+if(typeof __$main !== 'function') {
+  console.error('Error: main function not found');
+  process.exit(1);
+}
+
+__$main()?.then?.();

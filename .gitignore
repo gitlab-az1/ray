@@ -163,3 +163,7 @@ dist
 
 src/test.ts
 *.tmp
+
+/var/**/*
+/tmp/**/*
+/etc/**/*
