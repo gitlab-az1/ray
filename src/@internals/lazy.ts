@@ -32,7 +32,7 @@ export class Lazy<T> {
    * resolved once. `getValue` will re-throw exceptions that are hit while resolving the value
    */
   get value(): T {
-    if (!this._didRun) {
+    if(!this._didRun) {
       try {
         this._value = this._executor();
       } catch (err: any) {

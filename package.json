@@ -11,7 +11,8 @@
     "test:watch": "clear && tsnd -r tsconfig-paths/register --transpile-only --respawn --ignore-watch node_modules src/test.ts",
     "hot": "tsc --noEmit && yarn build && clear && node ./dist/index.js && rm -rf ./dist/",
     "test": "clear && yarn build && clear && NODE_ENV=test node ./dist/test.js && rm -rf ./dist/",
-    "spec": "clear && tsc --noEmit && NODE_ENV=test jest --verbose --runInBand"
+    "spec": "clear && tsc --noEmit && NODE_ENV=test jest --verbose --runInBand",
+    "dev": "tsnd -r tsconfig-paths/register --transpile-only --respawn --ignore-watch node_modules src/server.ts"
   },
   "devDependencies": {
     "@babel/cli": "^7.24.1",
@@ -21,7 +22,9 @@
     "@babel/plugin-transform-private-methods": "^7.24.1",
     "@babel/preset-env": "^7.24.4",
     "@babel/preset-typescript": "^7.24.1",
+    "@types/cookie-parser": "^1.4.7",
     "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
     "@types/jest": "^29.5.12",
     "@types/node": "^20.12.7",
     "@typescript-eslint/eslint-plugin": "^7.6.0",
@@ -29,10 +32,16 @@
     "babel-plugin-module-resolver": "^5.0.0",
     "eslint": "^8.57.0",
     "jest": "^29.7.0",
+    "ts-node-dev": "^2.0.0",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^5.4.5"
   },
   "dependencies": {
     "bufferutil": "^4.0.8",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "cryptx-sdk": "^1.2.3",
+    "express": "^4.19.2",
     "next-math": "^1.0.1",
     "not-synchronous": "^1.1.0",
     "typed-config-parser": "^1.1.0"

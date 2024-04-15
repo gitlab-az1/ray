@@ -27,6 +27,18 @@ export class SortedList<T = any> {
 
   public static readonly LIST_END: number = 255;
 
+  public constructor(items?: IterableIterator<[T, number] | { score: number; value: T }>) {
+    if(!items) return;
+
+    for(const item of items) {
+      if(Array.isArray(item)) {
+        this.add(item[0], item[1]);
+      } else {
+        this.add(item.value, item.score);
+      }
+    }
+  }
+
   public get length(): number {
     return this.#items.length;
   }
@@ -85,16 +97,18 @@ export class SortedList<T = any> {
     if(!item) return void 0;
 
     if(!item.mask) return item.value;
-    if(!(item.value instanceof Buffer)) return item.value;
+    if(!Buffer.isBuffer(item.value)) return item.value;
+
+    const buf = Buffer.from(item.value);
 
     switch(item.mask) {
       case 'i': 
-        unmask(item.value, intMask.value);
-        return parseInt(item.value.toString()) as T;
+        unmask(buf, intMask.value);
+        return parseInt(buf.toString()) as T;
         break;
       case 's':
-        unmask(item.value, strMask.value);
-        return item.value.toString() as T;
+        unmask(buf, strMask.value);
+        return buf.toString() as T;
         break;
       default:
         throw new Exception(`Invalid mask '${item.mask}'`);
@@ -182,6 +196,51 @@ export class SortedList<T = any> {
     }, [] as number[]);
   }
 
+  public removeDuplicates(keepScore: 'higher' | 'lower' = 'higher'): void {
+    const seenValues = new Set<T>();
+    const indexesToRemove: number[] = [];
+
+    for(let i = 0; i < this.#items.length; i++) {
+      const currentItem = this.#items[i];
+      let value = Buffer.isBuffer(currentItem.value) ? Buffer.from(currentItem.value) : currentItem.value;
+
+      switch(currentItem.mask) {
+        case 'i':
+          unmask(value, intMask.value);
+          value = parseInt(value.toString()) as T;
+          break;
+        case 's':
+          unmask(value, strMask.value);
+          value = value.toString() as T;
+          break;
+      }
+
+      if(seenValues.has(value)) {
+        const previousItem = this.#items[i - 1];
+      
+        if(keepScore === 'higher') {
+          if(currentItem.score > previousItem.score) {
+            indexesToRemove.push(i - 1);
+          } else {
+            indexesToRemove.push(i);
+          }
+        } else {
+          if(currentItem.score < previousItem.score) {
+            indexesToRemove.push(i - 1);
+          } else {
+            indexesToRemove.push(i);
+          }
+        }
+      } else {
+        seenValues.add(value);
+      }
+    }
+
+    for(let i = indexesToRemove.length - 1; i >= 0; i--) {
+      this.#items.splice(indexesToRemove[i], 1);
+    }
+  }
+
   public toArray(): T[] {
     return this.#items.map(item => {
       switch(item.mask) {
@@ -195,6 +254,10 @@ export class SortedList<T = any> {
           return item.value as T;
       }
     });
+  }
+
+  public toSet(): Set<T> {
+    return new Set(this.toArray());
   }
 
   public toJSON(): string {
@@ -219,6 +282,7 @@ export class SortedList<T = any> {
 
   public clear(): void {
     this.#items.length = 0;
+    this.#items = [];
   }
 
   #insertionSort(): void {
@@ -232,6 +296,16 @@ export class SortedList<T = any> {
       }
 
       this.#items[j + 1] = current;
+    }
+  }
+
+  public forEach(callback: (item: T, score: number, index: number, arr: T[]) => 'break' | void, stopAt?: number): void {
+    for(const { index, score, value } of this) {
+      if(stopAt && index >= stopAt) break;
+
+      const o = callback(value, score, index, this.toArray());
+
+      if(typeof o === 'string' && o === 'break') break;
     }
   }
 

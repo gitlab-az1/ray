@@ -149,4 +149,33 @@ describe('@datastructures/sorted-list', () => {
     expect(list.indexOfScore(2)).toStrictEqual([]);
     expect(list.indexOfScore(4)).toStrictEqual([]);
   });
+
+  test('should return a set with the items', () => {
+    list.add('apple', 3);
+    list.add('banana', 2);
+    list.add('orange', 4);
+
+    const set = list.toSet();
+
+    expect(set.size).toBe(3);
+    
+    expect(set.has('apple')).toBe(true);
+    expect(set.has('banana')).toBe(true);
+    expect(set.has('orange')).toBe(true);
+  });
+
+  test('should remove duplicated items', () => {
+    list.add('apple', 3);
+    list.add('banana', 2);
+    list.add('apple', 3);
+    list.add('orange', 4);
+    list.add('banana', 2);
+
+    expect(list.length).toBe(5);
+    
+    list.removeDuplicates();
+    
+    expect(list.length).toBe(3);
+    expect(list.toArray()).toStrictEqual(['banana', 'apple', 'orange']);
+  });
 });
