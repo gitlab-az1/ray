@@ -35,7 +35,7 @@ type Srv = (
 function createServer(): Srv {
   const config = readConfigFile();
 
-  if(config.force_ssl) return {
+  if((config.net as Record<string, any>)?.force_ssl) return {
     secure: true,
     server: https.createServer({
       // key: config.ssl_key,

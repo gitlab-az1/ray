@@ -11,7 +11,9 @@ import type { Dict, LooseAutocomplete, MaybePromise } from '@@types';
 
 
 
-export interface MappedEnvironmentVariables {}
+export interface MappedEnvironmentVariables {
+  readonly HMAC_KEY: string;
+}
 
 export interface EnvironmentVariables extends MappedEnvironmentVariables {
   [key: string]: string | undefined;
@@ -77,6 +79,13 @@ export class AbstractVariablesResolverService {
     const p = path.join(this.getAppRoot(), 'etc');
     ensureDirSync(p);
 
+    return p;
+  }
+
+  public getLogsPath(): string {
+    const p = path.join(this.getVariableDataPath(), 'logs');
+    ensureDirSync(p);
+    
     return p;
   }
 
@@ -196,7 +205,7 @@ export class AbstractVariablesResolverService {
 }
 
 
-const env = new AbstractVariablesResolverService(undefined, process.env);
+const env = new AbstractVariablesResolverService(undefined, process.env as EnvironmentVariables);
 
 export function readConfigFile(aliases?: Dict<string>): Dict<string | number | boolean | Record<string, string | number | boolean>> {
   const p = path.join(env.getConfigPath(), 'ray.conf');

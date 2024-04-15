@@ -20,6 +20,7 @@
     "@babel/node": "^7.23.9",
     "@babel/plugin-transform-class-properties": "^7.24.1",
     "@babel/plugin-transform-private-methods": "^7.24.1",
+    "@babel/plugin-transform-typescript": "^7.24.4",
     "@babel/preset-env": "^7.24.4",
     "@babel/preset-typescript": "^7.24.1",
     "@types/cookie-parser": "^1.4.7",
