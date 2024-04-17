@@ -1,15 +1,19 @@
 import os from 'node:os';
 import fs from 'node:fs';
 import path from 'node:path';
+import dotenv from 'typesdk/dotenv';
 import { Parser } from 'typed-config-parser';
 import { isThenable } from 'not-synchronous/core';
 
 import { Exception } from '@errors';
 import { ensureDirSync } from '@fs';
+import getAppStore from '@@internals/app-stores';
 import { createLoggerWithDiskFlusher } from '@@internals/log';
 import { assertString, isPlainObject } from '@@internals/utils';
 import type { Dict, LooseAutocomplete, MaybePromise } from '@@types';
 
+
+dotenv.load();
 
 
 export interface MappedEnvironmentVariables {
@@ -125,6 +129,13 @@ export class AbstractVariablesResolverService {
     return p;
   }
 
+  public getTLSPath(): string {
+    const p = path.join(this.getConfigPath(), 'tls');
+    ensureDirSync(p);
+
+    return p;
+  }
+
   public getEnvironmentVariable<K extends keyof MappedEnvironmentVariables, T = string>(
     name: LooseAutocomplete<K>,
     options: GetVariableOptionsWithFallback<T> // eslint-disable-line comma-dangle
@@ -192,11 +203,16 @@ export class AbstractVariablesResolverService {
     return process.env.NODE_ENV === 'edge';
   }
 
+  public isCLI(): boolean {
+    return process.env.CLI_ENV === '1';
+  }
+
   public isDevelopment(): boolean {
     return (
       !this.isProduction() && 
       !this.isTest() && 
-      !this.isEdge()
+      !this.isEdge() &&
+      !this.isCLI()
     );
   }
 
@@ -206,11 +222,29 @@ export class AbstractVariablesResolverService {
 }
 
 
-const env = new AbstractVariablesResolverService(undefined, process.env as EnvironmentVariables);
+export const env = new AbstractVariablesResolverService(undefined, process.env as EnvironmentVariables);
 
-export const logger = createLoggerWithDiskFlusher('rayrc.log');
+export const logger = createLoggerWithDiskFlusher('rayrc.log', { namespace: env.isCLI() ? 'cli' : undefined });
 
-export function readConfigFile(aliases?: Dict<string>): Dict<string | number | boolean | Record<string, string | number | boolean>> {
+export const liveNetworkStore = getAppStore('network');
+
+
+export type Conf = {
+  net?: {
+    listening_port?: number;
+    force_ssl?: boolean;
+    max_connections?: number;
+    max_connections_per_ip?: number;
+    client_timeout?: number;
+  };
+  auth?: {
+    enable_authentication?: boolean;
+    username?: string;
+    hashed_password?: string;
+  }
+};
+
+export function readConfigFile(aliases?: Dict<string>): Conf {
   const p = path.join(env.getConfigPath(), 'ray.conf');
   if(!fs.existsSync(p)) return {};
 

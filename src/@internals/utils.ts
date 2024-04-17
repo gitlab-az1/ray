@@ -67,3 +67,41 @@ export function isDigit(value: unknown): value is number {
     (value instanceof Number)
   ) && !Number.isNaN(value);
 } 
+
+
+export function convertUint8ArrayToHex(arr: Uint8Array): string {
+  return Array.prototype.map.call(arr, function(byte) {
+    return ('0' + byte.toString(16)).slice(-2);
+  }).join('');
+}
+
+export function removeDuplicates<T>(arr: Array<T>, key: keyof T): Array<T> {
+  const unique: Record<any, boolean> = {};
+
+  return arr.filter(item => {
+    if(unique[item[key]] === true) return false;
+    
+    unique[item[key] as any] = true;
+    return true;
+  });
+}
+
+
+export function exclude<
+  T extends Record<any, any>,
+  K extends keyof T
+>(
+  obj: T,
+  ...keys: K[]
+): Omit<T, K> {
+  if(typeof obj !== 'object' || Array.isArray(obj)) return obj;
+
+  const o = { ...obj };
+
+  for(const key of keys) {
+    if(!Object.prototype.hasOwnProperty.call(o, key)) continue;
+    delete o[key];
+  }
+
+  return o;
+}

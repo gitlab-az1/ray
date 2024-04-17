@@ -2,6 +2,10 @@
 /* eslint-enable semi, indent */
 "use strict";
 
+if(!process.env.CLI_ENV) {
+  process.env.CLI_ENV = '1';
+}
+
 const { __$main } = require(process.env.NODE_ENV === 'production' ?
   '/usr/local/lib/ray/cli' :
   '../dist/cli');

@@ -84,8 +84,13 @@ function _replaceObjectCirculars(obj: any): any {
       if(Array.isArray(obj[prop])) {
         safeValues[prop] = _replaceArrayCirculars(obj[prop]);
       } else if(_isInstanceOf(obj[prop])) {
-        if(Object.prototype.hasOwnProperty.call(obj[prop], Symbol.toStringTag)) {
-          safeValues[prop] = typeof obj[prop][Symbol.toStringTag] === 'function' ? obj[prop][Symbol.toStringTag]() : obj[prop][Symbol.toStringTag];
+        if(!!obj[prop].toString ||
+          !!obj[prop][Symbol.toStringTag]) {
+          if(typeof obj[prop].toString === 'function') {
+            safeValues[prop] = obj[prop].toString();
+          } else {
+            safeValues[prop] = typeof obj[prop][Symbol.toStringTag] === 'function' ? obj[prop][Symbol.toStringTag]() : obj[prop][Symbol.toStringTag];
+          }
         } else {
           safeValues[prop] = `<InstanceRef *${++refsCount}>${obj[prop].constructor.name ? ' (' + obj[prop].constructor.name + ')' : ''}`;
         }

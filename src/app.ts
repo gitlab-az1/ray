@@ -1,4 +1,4 @@
-import env from '@env';
+import { readConfigFile } from '@env';
 
 import express from 'express';
 import cookieParser from 'cookie-parser';
@@ -32,7 +32,9 @@ declare global {
 
 
 const app = express();
-export const port = parseInt(env.getEnvironmentVariable('PORT', { fallback: '4160' }), 10);
+
+const config = readConfigFile();
+export const port = parseInt(String(((<any>config.net)?.listening_port as number | undefined) ?? 4160), 10);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

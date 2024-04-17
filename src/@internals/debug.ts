@@ -55,7 +55,7 @@ export class Debugger extends EventEmitter {
     return this._level;
   }
 
-  public log(message: string, ...args: any[]): void {
+  public log(message: any, ...args: any[]): void {
     const msg = this.#makeMessage(this._level, message, ...args);
     const stream = this._level < DebugLevel.Warn ? 'stdout' : 'stderr';
 
@@ -65,7 +65,7 @@ export class Debugger extends EventEmitter {
     this.emit('log', new LogEvent({ message: msg, asciCleanMessage: msg.replace(/\u001b\[\d+m/g, '') }));
   }
 
-  public debug(message: string, ...args: any[]): void {
+  public debug(message: any, ...args: any[]): void {
     const msg = this.#makeMessage(DebugLevel.Debug, message, ...args);
     process.stdout.write(msg.endsWith('\n') ? msg : `${msg}\n`);
 
@@ -73,7 +73,7 @@ export class Debugger extends EventEmitter {
     this.emit('log', new LogEvent({ message: msg, asciCleanMessage: msg.replace(/\u001b\[\d+m/g, '') }));
   }
 
-  public info(message: string, ...args: any[]): void {
+  public info(message: any, ...args: any[]): void {
     const msg = this.#makeMessage(DebugLevel.Info, message, ...args);
     process.stdout.write(msg.endsWith('\n') ? msg : `${msg}\n`);
 
@@ -81,7 +81,7 @@ export class Debugger extends EventEmitter {
     this.emit('log', new LogEvent({ message: msg, asciCleanMessage: msg.replace(/\u001b\[\d+m/g, '') }));
   }
 
-  public warn(message: string, ...args: any[]): void {
+  public warn(message: any, ...args: any[]): void {
     const msg = this.#makeMessage(DebugLevel.Warn, message, ...args);
     process.stderr.write(msg.endsWith('\n') ? msg : `${msg}\n`);
 
@@ -89,7 +89,7 @@ export class Debugger extends EventEmitter {
     this.emit('log', new LogEvent({ message: msg, asciCleanMessage: msg.replace(/\u001b\[\d+m/g, '') }));
   }
 
-  public error(message: string, ...args: any[]): void {
+  public error(message: any, ...args: any[]): void {
     const msg = this.#makeMessage(DebugLevel.Error, message, ...args);
     process.stderr.write(msg.endsWith('\n') ? msg : `${msg}\n`);
 
@@ -97,7 +97,7 @@ export class Debugger extends EventEmitter {
     this.emit('log', new LogEvent({ message: msg, asciCleanMessage: msg.replace(/\u001b\[\d+m/g, '') }));
   }
 
-  public fatal(message: string, ...args: any[]): void {
+  public fatal(message: any, ...args: any[]): void {
     const msg = this.#makeMessage(DebugLevel.Fatal, message, ...args);
     process.stderr.write(msg.endsWith('\n') ? msg : `${msg}\n`);
 
@@ -105,7 +105,7 @@ export class Debugger extends EventEmitter {
     this.emit('log', new LogEvent({ message: msg, asciCleanMessage: msg.replace(/\u001b\[\d+m/g, '') }));
   }
 
-  #makeMessage(level: DebugLevel, message: string, ...args: any[]): string {
+  #makeMessage(level: DebugLevel, message: any, ...args: any[]): string {
     let msg = `${ASCI_GREEN}${new Date().toISOString()}${ASCI_RESET} ${this.#extractLevelColor(level)}[${DebugLevel[level].toLowerCase()}]${ASCI_RESET}`;
 
     if(this._namespace) {
@@ -118,6 +118,10 @@ export class Debugger extends EventEmitter {
       if(typeof args[i] === 'object' && isPlainObject(args[i])) {
         args[i] = jsonSafeStringify(args[i], null, 2);
       }
+    }
+
+    if(typeof message !== 'string') {
+      message = typeof message === 'number' ? message.toString() : jsonSafeStringify(message, null, 2) || '{}';
     }
 
     msg += ` ${format(message, ...args)}`;

@@ -3,7 +3,6 @@ import path from 'node:path';
 import { mask, unmask } from '@@internals/buffer';
 import { jsonSafeParser, jsonSafeStringify } from '@@internals/safe-json';
 
-import env from '@env';
 import { Lazy } from './lazy';
 import { ensureDirSync } from '@fs/ensure';
 import type { Dict, Writable } from '@@types';
@@ -11,7 +10,7 @@ import type { Dict, Writable } from '@@types';
 
 
 const bufferMask = new Lazy(() => Buffer.from('722f895c', 'hex')); // 8 bytes long mask for the buffer
-const base = path.join(env.getVariableDataPath(), '.store');
+let base: string;
 
 
 type Str = string | { toString(): string; } | { [Symbol.toPrimitive](kind: 'string'): string; } | { [Symbol.toStringTag]: string; };
@@ -47,13 +46,17 @@ export class Store<K extends string | Str = string, V = any> {
       throw new Error('Cannot use file system in Vercel environment');
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { env } = require('@env');
+    base = path.join(env.getVariableDataPath(), '.store');
+
     ensureDirSync(base);
     this.#name = name;
 
     const p = path.join(base, name);
     if(!fs.existsSync(p)) return;
 
-    const buf = Buffer.from(fs.readFileSync(p, { encoding: 'utf-8' }), 'base64');
+    const buf = Buffer.from(fs.readFileSync(p).toString(), 'binary');
     unmask(buf, bufferMask.value);
 
     const parsed = jsonSafeParser<any>(buf.toString());
@@ -222,7 +225,7 @@ export class Store<K extends string | Str = string, V = any> {
 
     fs.writeFileSync(
       path.join(base, this.#name),
-      output.toString('base64') // eslint-disable-line comma-dangle
+      Buffer.from(output.toString('binary')) // eslint-disable-line comma-dangle
     );
   }
 
