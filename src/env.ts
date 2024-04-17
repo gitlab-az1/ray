@@ -7,6 +7,7 @@ import { isThenable } from 'not-synchronous/core';
 
 import { Exception } from '@errors';
 import { ensureDirSync } from '@fs';
+import { uuid } from '@@internals/id';
 import getAppStore from '@@internals/app-stores';
 import { createLoggerWithDiskFlusher } from '@@internals/log';
 import { assertString, isPlainObject } from '@@internals/utils';
@@ -224,7 +225,9 @@ export class AbstractVariablesResolverService {
 
 export const env = new AbstractVariablesResolverService(undefined, process.env as EnvironmentVariables);
 
-export const logger = createLoggerWithDiskFlusher('rayrc.log', { namespace: env.isCLI() ? 'cli' : undefined });
+export const instanceId = uuid();
+
+export const logger = createLoggerWithDiskFlusher(`${instanceId}.rayrc.log`, { namespace: env.isCLI() ? 'cli' : undefined });
 
 export const liveNetworkStore = getAppStore('network');
 
@@ -241,7 +244,10 @@ export type Conf = {
     enable_authentication?: boolean;
     username?: string;
     hashed_password?: string;
-  }
+  };
+  server?: {
+    require_length?: boolean;
+  };
 };
 
 export function readConfigFile(aliases?: Dict<string>): Conf {

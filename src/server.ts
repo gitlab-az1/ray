@@ -5,9 +5,10 @@ import * as https from 'node:https';
 
 import routes from './routes';
 import app, { port } from './app';
+import begin from './middlewares/begin';
 import * as inet from '@@internals/inet';
+import env, { logger, readConfigFile } from '@env';
 import authenticateRequest from './middlewares/auth';
-import env, { liveNetworkStore, logger, readConfigFile } from '@env';
 import FileSystemCacheWriteQueue, { processFileSystemCacheWriteQueue } from '@@internals/queue/fscache-flush';
 
 
@@ -29,55 +30,9 @@ async function onListening() {
     FileSystemCacheWriteQueue.dispose();
   });
 
-  server.server.on('connect', (request, socket) => {
-    const currentClients = liveNetworkStore.get('connected_clients') ?? [];
-    const config = readConfigFile();
-    
-    const client = {
-      ip: request.socket.remoteAddress ?? inet.extractIPFromRequest(request).address,
-      port: request.socket.remotePort!,
-      connected_at: Date.now(),
-    };
-
-    const connectionsOfThisIP = currentClients.filter(c => c.ip === client.ip).length;
-
-    if(connectionsOfThisIP >= (config.net?.max_connections_per_ip ?? 6)) return socket.end();
-    if(currentClients.length >= (config.net?.max_connections ?? 16)) return socket.end();
-
-    socket.on('close', () => {
-      const currentClients = liveNetworkStore.get('connected_clients') ?? [];
-      liveNetworkStore.set('connected_clients', currentClients.filter(c => !(c.ip === client.ip && c.port === client.port)));
-    });
-
-    return void liveNetworkStore.set('connected_clients', [...currentClients, client]);
-  });
-
-  server.server.on('upgrade', (request, socket) => {
-    const currentClients = liveNetworkStore.get('connected_clients') ?? [];
-    const config = readConfigFile();
-    
-    const client = {
-      ip: request.socket.remoteAddress ?? inet.extractIPFromRequest(request).address,
-      port: request.socket.remotePort!,
-      connected_at: Date.now(),
-    };
-
-    const connectionsOfThisIP = currentClients.filter(c => c.ip === client.ip).length;
-
-    if(connectionsOfThisIP >= (config.net?.max_connections_per_ip ?? 6)) return socket.end();
-    if(currentClients.length >= (config.net?.max_connections ?? 16)) return socket.end();
-
-    socket.on('close', () => {
-      const currentClients = liveNetworkStore.get('connected_clients') ?? [];
-      liveNetworkStore.set('connected_clients', currentClients.filter(c => !(c.ip === client.ip && c.port === client.port)));
-    });
-
-    return void liveNetworkStore.set('connected_clients', [...currentClients, client]);
-  });
-
   logger.debug(`Ray server is running at ray${server.secure ? 's' : ''}://${inet.localIP().address}:${port}`);
 
-  app.use('/rayrc', authenticateRequest, routes);
+  app.use('/rayrc', begin, authenticateRequest, routes);
 
   app.use('*', (_, res) => {
     res.setHeader('Connection', 'close');

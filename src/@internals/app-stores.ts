@@ -14,6 +14,9 @@ export interface RayStores {
   network: {
     connected_clients: NetClient[];
   };
+  pubsub: {
+    //
+  };
 }
 
 

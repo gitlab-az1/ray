@@ -13,7 +13,7 @@
     "hot": "tsc --noEmit && yarn build && clear && node ./dist/index.js && rm -rf ./dist/",
     "test": "clear && yarn build && clear && NODE_ENV=test node ./dist/test.js && rm -rf ./dist/",
     "spec": "clear && tsc --noEmit && NODE_ENV=test jest --verbose --runInBand",
-    "dev": "tsnd -r tsconfig-paths/register --transpile-only --respawn --ignore-watch node_modules src/server.ts"
+    "dev": "clear && tsnd -r tsconfig-paths/register --transpile-only --respawn --ignore-watch node_modules src/server.ts"
   },
   "devDependencies": {
     "@babel/cli": "^7.24.1",
